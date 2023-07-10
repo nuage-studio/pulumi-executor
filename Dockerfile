@@ -21,7 +21,7 @@ RUN curl -sSL https://install.python-poetry.org/ | python
 RUN curl -fsSL https://get.pulumi.com | sh
 
 
-FROM python:${PYTHON_VERSION}-slim
+FROM python:${PYTHON_VERSION}-slim AS run
 
 # Install needed tools, like git
 RUN apt-get update -y && \
@@ -41,5 +41,8 @@ ENV PATH="/opt/poetry/bin:${PATH}"
 COPY --from=builder /root/.pulumi/bin/pulumi /pulumi/bin/pulumi
 COPY --from=builder /root/.pulumi/bin/*-python* /pulumi/bin/
 ENV PATH "/pulumi/bin:${PATH}"
+
+# Install AWS CLI
+RUN pip install awscli
 
 CMD ["pulumi"]
