@@ -6,5 +6,5 @@ vars:
   TAG: pulumi-executor
 
 tasks:
-  build: docker build -t {{.TAG}} .
+  build: docker build --tag {{.TAG}} .
   explore: docker run --rm -it {{.TAG}} bash

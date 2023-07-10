@@ -11,7 +11,9 @@ RUN apt-get update -y && \
     apt-get install -y \
     curl \
     build-essential \
-    git
+    git \
+    unzip
+    
 
 # Install Poetry
 ENV POETRY_HOME="/opt/poetry"
@@ -19,6 +21,13 @@ RUN curl -sSL https://install.python-poetry.org/ | python
 
 # Install Pulumi
 RUN curl -fsSL https://get.pulumi.com | sh
+
+# Install AWS CLI
+ARG TARGETARCH
+RUN if [ "${TARGETARCH}" = "arm64" ]; then ARCH="aarch64"; else ARCH="x86_64"; fi && \
+    curl "https://awscli.amazonaws.com/awscli-exe-linux-${ARCH}.zip" -o "awscliv2.zip" && \
+    unzip awscliv2.zip
+RUN ./aws/install --install-dir /opt/aws-cli --bin-dir /usr/local/bin
 
 
 FROM python:${PYTHON_VERSION}-slim AS run
@@ -42,7 +51,8 @@ COPY --from=builder /root/.pulumi/bin/pulumi /pulumi/bin/pulumi
 COPY --from=builder /root/.pulumi/bin/*-python* /pulumi/bin/
 ENV PATH "/pulumi/bin:${PATH}"
 
-# Install AWS CLI
-RUN pip install awscli
+# Copy AWS CLI from builder stage
+COPY --from=builder /opt/aws-cli /opt/aws-cli
+COPY --from=builder /usr/local/bin /usr/local/bin
 
 CMD ["pulumi"]
