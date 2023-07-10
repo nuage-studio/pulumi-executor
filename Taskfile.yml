@@ -1,0 +1,10 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  TAG: pulumi-executor
+
+tasks:
+  build: docker build -t {{.TAG}} .
+  explore: docker run --rm -it {{.TAG}} bash
