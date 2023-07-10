@@ -2,8 +2,14 @@
 ARG PYTHON_VERSION="3.11"
 FROM python:${PYTHON_VERSION}
 
-# Install cURL
-RUN apt-get install -y curl && apt-get clean
+
+# Install needed tools, like git
+RUN apt-get update -y && \
+    apt-get install -y \
+    curl \
+    git \
+    ca-certificates \
+    && apt-get clean
 
 # Install Poetry
 ENV POETRY_HOME="/opt/poetry"
@@ -12,3 +18,8 @@ ENV PATH="${POETRY_HOME}/bin:${PATH}"
 
 # Install Pulumi
 RUN curl -fsSL https://get.pulumi.com | sh
+ENV PATH "/pulumi/bin:${PATH}"
+
+WORKDIR /pulumi/projects
+
+CMD ["pulumi"]

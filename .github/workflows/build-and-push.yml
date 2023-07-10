@@ -12,9 +12,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: py/projects/infrastructure
+    strategy:
+      matrix:
+        python-version: [3.11, 3.10]
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v3
@@ -37,4 +37,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/pulumi-executor-poetry:latest
+          build-args: PYTHON_VERSION=${{ matrix.python-version }}
+          tags: ghcr.io/${{ github.repository_owner }}/pulumi-executor-poetry:${{ matrix.python-version }}
+      
+      - name: Tag 3.11 as latest
+        if: matrix.python-version == '3.11'
+        run: >-
+          docker tag
+          ghcr.io/${{ github.repository_owner }}/pulumi-executor-poetry:3.11
+          ghcr.io/${{ github.repository_owner }}/pulumi-executor-poetry:latest
